@@ -61,17 +61,23 @@ public class Server {
         System.out.println("3. Encode Key:" + aeskeyencoded);
         System.out.println("3. Binary Key:" + aeskeyencoded.getBytes());
 
-        // Check for keys
+        // Check for keys & Create them
         if (!areKeysPresent()) {
             System.out.println("\n "
                     + "-------------------------------------------\n"
-                    + "    Cant find Private and Public Keys!!    \n"
+                    + "    Can't find Private and Public Keys!!   \n"
+                    + "            Generating now..               \n"
                     + "-------------------------------------------\n");
+            CreateKeys();
+            if (!areKeysPresent()) {
+                System.out.println("Something going wrong with keys :(");
+            }
         }
 
         // Encrypt AES Key with Server's Private RSA Key
         ObjectInputStream inputStream = null;
         inputStream = new ObjectInputStream(new FileInputStream(PRIVATE_KEY_FILE));
+        // TODO: Fix BigInteger Casting
         final PrivateKey privateKey = (PrivateKey) inputStream.readObject();
         final byte[] cryptoaeskey = encrypt(aeskeyencoded, privateKey);
         System.out.println("4. Encrypt with Server's Private Key(1): " + cryptoaeskey);
@@ -133,7 +139,7 @@ public class Server {
     public static final String PUBLIC_KEY_FILE = "servprivate.key";
 
     // Generate Keys and Save them
-    public void CreateKeys() throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
+    public static void CreateKeys() throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         kpg.initialize(2048);
         KeyPair kp = kpg.genKeyPair();
@@ -148,7 +154,7 @@ public class Server {
 
     }
 
-    public void saveToFile(String fileName, BigInteger mod, BigInteger exp) throws IOException {
+    public static void saveToFile(String fileName, BigInteger mod, BigInteger exp) throws IOException {
         ObjectOutputStream oout = new ObjectOutputStream(
                 new BufferedOutputStream(new FileOutputStream(fileName)));
         try {
