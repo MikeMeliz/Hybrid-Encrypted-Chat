@@ -39,38 +39,40 @@ public class Server {
         BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
         String inputLine, outputLine;
 
-        System.out.println("Server run ");
+        if (Debugger.isEnabled())
+            Debugger.log("Server started");
 
         // Generate AES Key
         KeyGenerator AES_keygen = KeyGenerator.getInstance("AES");
         AES_keygen.init(256, new SecureRandom());
         SecretKey AES_Key = AES_keygen.generateKey();
-        System.out.println("1. Generate Key: " + AES_Key);
-
-        // Generate RSA Keys
-        //if (!CreateKeys()) {
-        //
-        //}
-
+        
         // Convert to Byte
         byte[] data = AES_Key.getEncoded();
-        System.out.println("2. Convert Key to Byte:" + data);
-
+        
         //Encode Key
         String aeskeyencoded = Base64.getEncoder().encodeToString(data);
-        System.out.println("3. Encode Key:" + aeskeyencoded);
-        System.out.println("3. Binary Key:" + aeskeyencoded.getBytes());
+        
+        if (Debugger.isEnabled()) {
+            Debugger.log("1. Generate Key: " + AES_Key);
+            Debugger.log("2. Convert Key to Byte:" + data);
+            Debugger.log("3. Encode Key:" + aeskeyencoded);
+            Debugger.log("3. Binary Key:" + aeskeyencoded.getBytes());
+        }
 
         // Check for keys & Create them
         if (!areKeysPresent()) {
-            System.out.println("\n "
+            if (Debugger.isEnabled()) {
+                Debugger.log("\n "
                     + "-------------------------------------------\n"
-                    + "    Can't find Private and Public Keys!!   \n"
+                    + "    Didn't find Private and Public Keys!!  \n"
                     + "            Generating now..               \n"
                     + "-------------------------------------------\n");
+            }
             CreateKeys();
             if (!areKeysPresent()) {
-                System.out.println("Something going wrong with keys :(");
+                if (Debugger.isEnabled())
+                    Debugger.log("Something going wrong with keys :(");
             }
         }
 
@@ -80,28 +82,29 @@ public class Server {
         // TODO: Fix BigInteger Casting
         final PrivateKey privateKey = (PrivateKey) inputStream.readObject();
         final byte[] cryptoaeskey = encrypt(aeskeyencoded, privateKey);
-        System.out.println("4. Encrypt with Server's Private Key(1): " + cryptoaeskey);
-
-        //Debug
-        System.out.println("Debug: " + cryptoaeskey.toString());
+        
+        if (Debugger.isEnabled()) {
+            Debugger.log("4. Encrypt with Server's Private Key(1): " + cryptoaeskey);
+            Debugger.log("4. String of it: " + cryptoaeskey.toString());
+        }
 
         // Encrypt AES Key with Client's Public RSA Key
         ObjectInputStream inputStream2 = null;
         inputStream2 = new ObjectInputStream(new FileInputStream(PUBLIC_KEY_FILE));
         final PublicKey publicKey = (PublicKey) inputStream2.readObject();
-        //String cryptoaeskeystr = new String(cryptoaeskey, "UTF-8");
         final byte[] cryptoaeskey2 = encrypt2(cryptoaeskey.toString(), publicKey);
-        System.out.println("6. Encrypt with Client's Public Key(2): " + cryptoaeskey2);
-
-        // Encode
         String encodeaeskey = Base64.getEncoder().encodeToString(cryptoaeskey2);
-        System.out.println("7. Encode Kleidiou:" + encodeaeskey);
-        System.out.println("7. Binary Kleidiou:" + encodeaeskey.getBytes());
+        
+        if (Debugger.isEnabled()) {
+            Debugger.log("6. Encrypt with Client's Public Key(2): " + cryptoaeskey2);
+            Debugger.log("7. Encode Key:" + encodeaeskey);
+            Debugger.log("7. Binary Key:" + encodeaeskey.getBytes());
+            Debugger.log("8. Sending Key: " + encodeaeskey);
+        }
 
         // Send Encrypted AES Key
         out.println(encodeaeskey);
-        System.out.println("8. Sending Key: " + encodeaeskey);
-
+        
         while ((inputLine = in.readLine()) != null) {
 
             Cipher AES_Cipher = Cipher.getInstance("AES/ECB/PKCS5Padding", "BC");
@@ -127,9 +130,6 @@ public class Server {
         serverSocket.close();
     }
 
-    /**
-     * RSA Input Files & Encrypt & Decrypt
-     */
     // String to hold name of the encryption algorithm.
     public static final String ALGORITHM2 = "RSA/None/NoPadding";
     public static final String ALGORITHM = "RSA/ECB/PKCS1Padding";
@@ -211,4 +211,18 @@ public class Server {
         return cipherText2;
     }
 
+}
+
+class Debugger{
+    public static boolean isEnabled(){
+        return true;
+    }
+
+    public static void log(Object o){
+        System.out.println(o.toString());
+    }
+    /*  
+    if (Debugger.isEnabled())
+        Debugger.log("");
+    */
 }
