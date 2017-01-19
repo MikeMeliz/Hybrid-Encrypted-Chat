@@ -36,36 +36,46 @@ public class Client {
         String fromServer = null;
         String fromUser;
 
-        System.out.println("Client run ");
+        if (ClDebugger.isEnabled())
+            ClDebugger.log("Client run ");
 
         // Generate RSA Keys
         //CreateKeys();
 
         String cryptoaes3 = in.readLine();
 
-        System.out.println("Download Key: " + cryptoaes3);
+        if (ClDebugger.isEnabled())
+            ClDebugger.log("Download Key: " + cryptoaes3);
 
         // Decode Key
         byte[] cryptoaes = Base64.getDecoder().decode(cryptoaes3);
-        System.out.println("Decode Key: " + cryptoaes);
+        
+        if (ClDebugger.isEnabled())
+            ClDebugger.log("Decode Key: " + cryptoaes);
 
         // Decrypt AES Key with Client's Private Key
         ObjectInputStream inputStream = null;
         inputStream = new ObjectInputStream(new FileInputStream(PRIVATE_KEY_FILE));
         final PrivateKey privateKey = (PrivateKey) inputStream.readObject();
         final String uncryaes = decrypt(cryptoaes, privateKey);
-        System.out.println("Decrypt with Client's Private Key(2):" + uncryaes);
+        
+        if (ClDebugger.isEnabled())
+            ClDebugger.log("Decrypt with Client's Private Key(2):" + uncryaes);
 
         // Decrypt AES Key with Server's Public Key
         ObjectInputStream inputStream2 = null;
         inputStream2 = new ObjectInputStream(new FileInputStream(PUBLIC_KEY_FILE));
         final PublicKey publicKey = (PublicKey) inputStream2.readObject();
         final String uncryaes2 = decrypt2(uncryaes.getBytes(), publicKey);
-        System.out.println("Decrypt with Server's Public Key(1):" + uncryaes2);
+        
+        if (ClDebugger.isEnabled())
+            ClDebugger.log("Decrypt with Server's Public Key(1):" + uncryaes2);
 
         SecretKeySpec secretKeySpec = new SecretKeySpec(uncryaes2.getBytes(), "AES");
-        System.out.println("Symmetrical Key: " + secretKeySpec);
 
+        if (ClDebugger.isEnabled())
+            ClDebugger.log("Symmetrical Key: " + secretKeySpec);
+        
         while (true) {
 
             Scanner keyboard = new Scanner(System.in);
@@ -194,4 +204,18 @@ public class Client {
         return new String(dectyptedText2);
     }
 
+}
+
+class ClDebugger{
+    public static boolean isEnabled(){
+        return true;
+    }
+
+    public static void log(Object o){
+        System.out.println(o.toString());
+    }
+    /*  
+    if (ClDebugger.isEnabled())
+        ClDebugger.log("");
+    */
 }
