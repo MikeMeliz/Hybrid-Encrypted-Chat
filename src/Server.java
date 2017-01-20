@@ -79,7 +79,7 @@ public class Server {
         // Encrypt AES Key with Server's Private RSA Key
         ObjectInputStream inputStream = null;
         inputStream = new ObjectInputStream(new FileInputStream(PRIVATE_KEY_FILE));
-        // TODO: Fix BigInteger Casting
+        // TODO: Fix java.math.BigInteger cannot be cast to java.security.PrivateKey
         final PrivateKey privateKey = (PrivateKey) inputStream.readObject();
         final byte[] cryptoaeskey = encrypt(aeskeyencoded, privateKey);
         
@@ -134,7 +134,7 @@ public class Server {
     public static final String ALGORITHM2 = "RSA/None/NoPadding";
     public static final String ALGORITHM = "RSA/ECB/PKCS1Padding";
     //String to hold the name of the private key file.
-    public static final String PRIVATE_KEY_FILE = "servpublic.key";
+    public static final String PRIVATE_KEY_FILE = "cliepublic.key";
     //String to hold name of the public key file.
     public static final String PUBLIC_KEY_FILE = "servprivate.key";
 
@@ -143,8 +143,8 @@ public class Server {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         kpg.initialize(2048);
         KeyPair kp = kpg.genKeyPair();
-        Key publicKey = kp.getPublic();
-        Key privateKey = kp.getPrivate();
+        //Key publicKey = kp.getPublic();
+        //Key privateKey = kp.getPrivate();
         KeyFactory fact = KeyFactory.getInstance("RSA");
         RSAPublicKeySpec pub = fact.getKeySpec(kp.getPublic(), RSAPublicKeySpec.class);
         RSAPrivateKeySpec priv = fact.getKeySpec(kp.getPrivate(), RSAPrivateKeySpec.class);

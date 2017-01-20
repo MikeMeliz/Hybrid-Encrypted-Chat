@@ -37,30 +37,46 @@ public class Client {
         String fromUser;
 
         if (ClDebugger.isEnabled())
-            ClDebugger.log("Client run ");
+            ClDebugger.log("Client started");
 
-        // Generate RSA Keys
-        //CreateKeys();
-
-        String cryptoaes3 = in.readLine();
-
-        if (ClDebugger.isEnabled())
-            ClDebugger.log("Download Key: " + cryptoaes3);
-
-        // Decode Key
-        byte[] cryptoaes = Base64.getDecoder().decode(cryptoaes3);
+        // Check for keys & Create them
+        if (!areKeysPresent()) {
+            if (Debugger.isEnabled()) {
+                Debugger.log("\n "
+                    + "-------------------------------------------\n"
+                    + "    Didn't find Private and Public Keys!!  \n"
+                    + "            Generating now..               \n"
+                    + "-------------------------------------------\n");
+            }
+            CreateKeys();
+            if (!areKeysPresent()) {
+                if (Debugger.isEnabled())
+                    Debugger.log("Something going wrong with keys :(");
+            }
+        }
         
-        if (ClDebugger.isEnabled())
-            ClDebugger.log("Decode Key: " + cryptoaes);
+        String inputLine;
+        byte[] cryptoaes = null;
+        
+        // Download and Decode AES Key
+        while ((inputLine = in.readLine()) != null) {
+            String cryptoaesunc = in.readLine();
+            cryptoaes = Base64.getDecoder().decode(cryptoaesunc);
 
+            if (ClDebugger.isEnabled()) {
+                ClDebugger.log("1. Download Key: " + cryptoaesunc);
+                ClDebugger.log("1. Decode Key: " + cryptoaes);
+            }
+        }
         // Decrypt AES Key with Client's Private Key
         ObjectInputStream inputStream = null;
         inputStream = new ObjectInputStream(new FileInputStream(PRIVATE_KEY_FILE));
+        // TODO: Fix java.math.BigInteger cannot be cast to java.security.PrivateKey
         final PrivateKey privateKey = (PrivateKey) inputStream.readObject();
         final String uncryaes = decrypt(cryptoaes, privateKey);
         
         if (ClDebugger.isEnabled())
-            ClDebugger.log("Decrypt with Client's Private Key(2):" + uncryaes);
+            ClDebugger.log("2. Decrypt with Client's Private Key(2):" + uncryaes);
 
         // Decrypt AES Key with Server's Public Key
         ObjectInputStream inputStream2 = null;
@@ -69,7 +85,7 @@ public class Client {
         final String uncryaes2 = decrypt2(uncryaes.getBytes(), publicKey);
         
         if (ClDebugger.isEnabled())
-            ClDebugger.log("Decrypt with Server's Public Key(1):" + uncryaes2);
+            ClDebugger.log("3. Decrypt with Server's Public Key(1):" + uncryaes2);
 
         SecretKeySpec secretKeySpec = new SecretKeySpec(uncryaes2.getBytes(), "AES");
 
@@ -123,27 +139,27 @@ public class Client {
     public static final String ALGORITHM2 = "RSA/None/NoPadding";
     public static final String ALGORITHM = "RSA/ECB/PKCS1Padding";
     // String to hold the name of the private key file.
-    public static final String PRIVATE_KEY_FILE = "keys/clientpriv.key";
+    public static final String PRIVATE_KEY_FILE = "clieprivate.key";
     // String to hold name of the public key file.
-    public static final String PUBLIC_KEY_FILE = "keys/clientpub.key";
+    public static final String PUBLIC_KEY_FILE = "servpublic.key";
 
     // Generate Keys and Save them
-    public void CreateKeys() throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
+    public static void CreateKeys() throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         kpg.initialize(2048);
         KeyPair kp = kpg.genKeyPair();
-        Key publicKey = kp.getPublic();
-        Key privateKey = kp.getPrivate();
+        //Key publicKey = kp.getPublic();
+        //Key privateKey = kp.getPrivate();
         KeyFactory fact = KeyFactory.getInstance("RSA");
         RSAPublicKeySpec pub = fact.getKeySpec(kp.getPublic(), RSAPublicKeySpec.class);
         RSAPrivateKeySpec priv = fact.getKeySpec(kp.getPrivate(), RSAPrivateKeySpec.class);
 
-        saveToFile("servpublic.key", pub.getModulus(), pub.getPublicExponent());
-        saveToFile("servprivate.key", priv.getModulus(), priv.getPrivateExponent());
+        saveToFile("cliepublic.key", pub.getModulus(), pub.getPublicExponent());
+        saveToFile("clieprivate.key", priv.getModulus(), priv.getPrivateExponent());
 
     }
 
-    public void saveToFile(String fileName, BigInteger mod, BigInteger exp) throws IOException {
+    public static void saveToFile(String fileName, BigInteger mod, BigInteger exp) throws IOException {
         ObjectOutputStream oout = new ObjectOutputStream(
                 new BufferedOutputStream(new FileOutputStream(fileName)));
         try {
