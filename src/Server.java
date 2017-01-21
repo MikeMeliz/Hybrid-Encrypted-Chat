@@ -56,19 +56,16 @@ public class Server {
         if (Debugger.isEnabled()) {
             Debugger.log("1. Generate Key: " + AES_Key);
             Debugger.log("2. Convert Key to Byte:" + data);
-            Debugger.log("3. Encode Key:" + aeskeyencoded);
-            Debugger.log("3. Binary Key:" + aeskeyencoded.getBytes());
+            Debugger.log("3. Encode Key:" + aeskeyencoded + " | Binary Key: " + aeskeyencoded.getBytes());
         }
 
         // Check for keys & Create them
         if (!areKeysPresent()) {
-            if (Debugger.isEnabled()) {
-                Debugger.log("\n "
+            System.out.println("\n "
                     + "-------------------------------------------\n"
                     + "    Didn't find Private and Public Keys!!  \n"
                     + "            Generating now..               \n"
                     + "-------------------------------------------\n");
-            }
             CreateKeys();
             if (!areKeysPresent()) {
                 if (Debugger.isEnabled())
@@ -84,21 +81,18 @@ public class Server {
         final byte[] cryptoaeskey = encrypt(aeskeyencoded, privateKey);
         
         if (Debugger.isEnabled()) {
-            Debugger.log("4. Encrypt with Server's Private Key(1): " + cryptoaeskey);
-            Debugger.log("4. String of it: " + cryptoaeskey.toString());
+            Debugger.log("4. Encrypt with Server's Private Key(1): " + cryptoaeskey + " | String: " + cryptoaeskey.toString());
         }
 
         // Encrypt AES Key with Client's Public RSA Key
-        ObjectInputStream inputStream2 = null;
-        inputStream2 = new ObjectInputStream(new FileInputStream(PUBLIC_KEY_FILE));
+        ObjectInputStream inputStream2 = new ObjectInputStream(new FileInputStream(PUBLIC_KEY_FILE));
         final PublicKey publicKey = (PublicKey) inputStream2.readObject();
         final byte[] cryptoaeskey2 = encrypt2(cryptoaeskey.toString(), publicKey);
         String encodeaeskey = Base64.getEncoder().encodeToString(cryptoaeskey2);
         
         if (Debugger.isEnabled()) {
             Debugger.log("6. Encrypt with Client's Public Key(2): " + cryptoaeskey2);
-            Debugger.log("7. Encode Key:" + encodeaeskey);
-            Debugger.log("7. Binary Key:" + encodeaeskey.getBytes());
+            Debugger.log("7. Encode Key:" + encodeaeskey + " | Binary: " + encodeaeskey.getBytes());
             Debugger.log("8. Sending Key: " + encodeaeskey);
         }
 
