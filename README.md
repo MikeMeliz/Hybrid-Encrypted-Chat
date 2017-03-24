@@ -6,10 +6,10 @@
 
 # Hybrid-Encrypted-Chat
 
-[![Version](https://img.shields.io/badge/version-0.3-yellow.svg?style=plastic)]() [![license](https://img.shields.io/github/license/MikeMeliz/EasyCapture.svg?style=plastic)]()
+[![Version](https://img.shields.io/badge/version-0.3-red.svg?style=plastic)]() [![license](https://img.shields.io/github/license/MikeMeliz/EasyCapture.svg?style=plastic)]()
 
 ## Basic Information:
-A java client-server chat protected with hybrid encryption (AES, RSA)
+A java client-server chat protected with hybrid encryption (AES, RSA). **Keep in mind,** this project is under heavy development and it's not ready for use.
 
 ## Installation:
 You can even clone the project and build it through Netbeans IDE or download the two java files and execute them on your computer.
