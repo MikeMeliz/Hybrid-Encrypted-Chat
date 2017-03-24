@@ -4,7 +4,7 @@
   Author: MikeMeliz
   -->
 
-# Hybrid-Encrypted-Chat
+# Hybrid Encrypted Chat
 
 [![Version](https://img.shields.io/badge/version-0.3-red.svg?style=plastic)]() [![license](https://img.shields.io/github/license/MikeMeliz/EasyCapture.svg?style=plastic)]()
 
